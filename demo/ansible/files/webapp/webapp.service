@@ -1,0 +1,15 @@
+$[Unit]
+Description=simple webapp
+After=network.target
+
+[Service]
+DynamicUser=yes
+ExecStart=/usr/local/bin/webapp
+Restart=on-failure
+Environment=PG_USERNAME=avnadmin
+Environment=PG_DB=defaultdb
+Environment=PG_URL=
+Environment=PG_PASSWORD=
+
+[Install]
+WantedBy=multi-user.target

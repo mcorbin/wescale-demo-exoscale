@@ -1,0 +1,27 @@
+---
+- hosts: webapps
+  become: true
+  remote_user: debian
+  tasks:
+    - name: "get app binary"
+      get_url:
+        url: https://sos-de-fra-1.exo.io/mcorbin-apps/webapp
+        dest: /usr/local/bin/webapp
+        owner: root
+        group: root
+        mode: 0755
+    - name: "template my webapp systemd service"
+      ansible.builtin.copy:
+        src: files/webapp/webapp.service
+        dest: /lib/systemd/system/webapp.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: systemd daemon-reload
+      ansible.builtin.systemd:
+        daemon_reload: true
+    - name: Start service
+      ansible.builtin.systemd:
+        name: webapp
+        state: restarted
+        enabled: true

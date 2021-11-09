@@ -1,0 +1,106 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tour-clj
+  labels:
+    app.kubernetes.io/name: tour-clj
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tour-clj
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tour-clj
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - tour-clj
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: tour-clj
+        image: mcorbin/tour-of-clojure:v0.13.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 700m
+            memory: 500Mi
+          requests:
+            cpu: 700m
+            memory: 500Mi
+        ports:
+        - containerPort: 8080
+          name: site
+          protocol: TCP
+        securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1664
+        livenessProbe:
+          httpGet:
+            path: /
+            port: site
+            scheme: HTTP
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: site
+            scheme: HTTP
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        startupProbe:
+          httpGet:
+            path: /
+            port: site
+            scheme: HTTP
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tour-clj
+spec:
+  selector:
+    app.kubernetes.io/name: tour-clj
+  ports:
+  - protocol: TCP
+    name: site
+    targetPort: 8080
+    port: 7000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  name: tour-clj
+spec:
+  rules:
+  - host: tuto.wescale-demo.fr
+    http:
+      paths:
+      - path: /
+        pathType: "Prefix"
+        backend:
+          service:
+            name: tour-clj
+            port:
+              number: 7000
