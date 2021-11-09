@@ -4,7 +4,12 @@ The slides are in `demo/wescale.pdf`
 
 ### Terraform
 
-Add your Exoscale credentials in "main.tf" and run `terraform apply`. It will deploy the infrasteucture described in the slides.
+Add your Exoscale credentials in "main.tf" and run `terraform apply`. It will deploy the infrastructure described in the slides.
+
+### Kubernetes manifests
+
+You can use the manifest in `demo/manifests` to deploy a small application. You can then expose it on the internet by applying for example the Ingress NGINX manifest for Exoscale (https://kubernetes.github.io/ingress-nginx/deploy/#exoscale).
+This manifest will bootstrap a load balancer. The application ingress expects to receive traffic targeting the host `tuto.wescale-demo.fr`, so you can modify your `/etc/host` file in order to make `tuto.wescale-demo.fr` resolve to the IP of the load balancer created by kubernetes.
 
 ### Ansible/Go app
 
